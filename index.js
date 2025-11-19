@@ -80,3 +80,5 @@ app.get('/users', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server jalan di http://localhost:${port}`);
 });
+
+//examples
