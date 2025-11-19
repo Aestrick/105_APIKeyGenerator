@@ -53,7 +53,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// B. ADMIN LOGIN (RUTE INI YANG TADI HILANG/ERROR 404)
+// B. ADMIN LOGIN
 app.post('/admin-login', (req, res) => {
     const { email, password } = req.body;
 
@@ -76,9 +76,30 @@ app.get('/users', async (req, res) => {
     }
 });
 
+// D. DELETE USER (BUAT TOMBOL HAPUS)
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+        // 1. Cari user berdasarkan ID
+        const user = await db.User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+        }
+
+        // 2. Hapus user dari database
+        await user.destroy();
+
+        res.json({ success: true, message: 'User berhasil dihapus' });
+    } catch (error) {
+        console.error("Error Delete User:", error);
+        res.status(500).json({ success: false, message: 'Gagal menghapus user' });
+    }
+});
+
+
 // Jalankan Server
 app.listen(port, () => {
     console.log(`Server jalan di http://localhost:${port}`);
 });
-
-//examples

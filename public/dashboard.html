@@ -10,20 +10,19 @@
     <div class="max-w-6xl mx-auto bg-white p-8 rounded-xl shadow-xl border-t-4 border-green-600">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-serif text-gray-800">Dashboard Admin: Daftar User & API Key</h1>
-            <a href="index.html" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">Logout</a>
+            <a href="login.html" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm transition">Logout</a>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full border-collapse">
                 <thead>
                     <tr class="bg-gray-100 text-left text-gray-600 uppercase text-sm leading-normal">
-                        <th class="py-3 px-6">ID User</th>
-                        <th class="py-3 px-6">Nama Depan</th>
-                        <th class="py-3 px-6">Nama Belakang</th>
+                        <th class="py-3 px-6">ID</th>
+                        <th class="py-3 px-6">Nama Lengkap</th>
                         <th class="py-3 px-6">Email</th>
                         <th class="py-3 px-6">API Key</th>
-                        <th class="py-3 px-6">Status Key</th>
-                        <th class="py-3 px-6">Aksi</th>
+                        <th class="py-3 px-6 text-center">Status</th>
+                        <th class="py-3 px-6 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-600 text-sm font-light" id="tableBody">
@@ -33,27 +32,68 @@
     </div>
 
     <script>
+        // 1. Fungsi untuk mengambil data dari server
         async function loadData() {
-            const res = await fetch('http://localhost:3000/users');
-            const users = await res.json();
-            const tableBody = document.getElementById('tableBody');
+            try {
+                const res = await fetch('http://localhost:3000/users');
+                const users = await res.json();
+                const tableBody = document.getElementById('tableBody');
 
-            tableBody.innerHTML = users.map(user => `
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="py-3 px-6 text-left whitespace-nowrap">${user.id}</td>
-                    <td class="py-3 px-6 text-left">${user.firstName}</td>
-                    <td class="py-3 px-6 text-left">${user.lastName}</td>
-                    <td class="py-3 px-6 text-left">${user.email}</td>
-                    <td class="py-3 px-6 text-left font-mono text-xs bg-gray-100 p-1 rounded">${user.api_key}</td>
-                    <td class="py-3 px-6 text-center">
-                        <span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${user.status}</span>
-                    </td>
-                    <td class="py-3 px-6 text-center">
-                        <button class="text-red-500 hover:text-red-700">Hapus</button>
-                    </td>
-                </tr>
-            `).join('');
+                // Render tabel
+                tableBody.innerHTML = users.map(user => `
+                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <td class="py-3 px-6 text-left whitespace-nowrap font-bold">${user.id}</td>
+                        <td class="py-3 px-6 text-left">${user.firstName} ${user.lastName}</td>
+                        <td class="py-3 px-6 text-left">${user.email}</td>
+                        <td class="py-3 px-6 text-left">
+                            <span class="font-mono text-xs bg-gray-100 p-1 rounded border border-gray-300 select-all">
+                                ${user.api_key}
+                            </span>
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            <span class="bg-green-200 text-green-800 py-1 px-3 rounded-full text-xs font-semibold">
+                                ${user.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            <button onclick="deleteUser(${user.id})" 
+                                class="bg-red-100 text-red-600 py-1 px-3 rounded hover:bg-red-600 hover:text-white transition duration-300 transform hover:scale-105">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error("Gagal memuat data:", error);
+            }
         }
+
+        // 2. Fungsi untuk Menghapus User
+        async function deleteUser(id) {
+            // Konfirmasi dulu biar nggak kehapus nggak sengaja
+            if (!confirm("Apakah Anda yakin ingin menghapus user ini? API Key mereka akan hangus.")) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`http://localhost:3000/users/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert("User Berhasil Dihapus!");
+                    loadData(); // Refresh tabel otomatis
+                } else {
+                    alert("Gagal menghapus user.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Terjadi kesalahan koneksi.");
+            }
+        }
+
+        // Load data pas halaman dibuka
         loadData();
     </script>
 </body>

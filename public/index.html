@@ -51,11 +51,13 @@
     </div>
 
     <script>
-        // Fungsi Generate Key Random di Frontend (Sesuai flow gambar)
+        // Fungsi Generate Key Visual (Buat tampilan aja)
         function generateKey() {
-            const randomKey = [...Array(30)].map(() => Math.random().toString(36)[2]).join('');
+            const randomKey = [...Array(32)].map(() => Math.random().toString(36)[2]).join('');
             const apiKeyInput = document.getElementById('apiKey');
             apiKeyInput.value = randomKey;
+            
+            // Bikin tampilan jadi aktif
             apiKeyInput.classList.remove('bg-gray-100', 'text-gray-500', 'italic');
             apiKeyInput.classList.add('bg-white', 'text-gray-800', 'font-mono');
             
@@ -69,27 +71,35 @@
         // Kirim Data ke Backend
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Ambil data dari form
             const data = {
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                api_key: document.getElementById('apiKey').value
+                email: document.getElementById('email').value
+                // Note: Kita gak kirim API Key dari sini, biar Server yang bikinin yang valid
             };
 
-            const res = await fetch('http://localhost:3000/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            try {
+                const res = await fetch('http://localhost:3000/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            const result = await res.json();
-            if (result.success) {
-                alert('User & API Key Berhasil Disimpan!');
-                window.location.reload();
-            } else {
-                alert('Gagal menyimpan data.');
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert('User & API Key Berhasil Disimpan!');
+                    // Tampilkan API Key yang asli dari server (opsional, atau reload aja)
+                    window.location.reload();
+                } else {
+                    // Tampilkan pesan error dari server (misal: Email duplikat)
+                    alert('Gagal: ' + result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Gagal menghubungi server.');
             }
         });
     </script>
-</body>
-</html>
